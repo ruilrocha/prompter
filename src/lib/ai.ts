@@ -19,8 +19,10 @@ Respond with the scenario only.`
 export async function generatePrompt(date: string): Promise<string> {
   const systemMessage = process.env.PROMPT_TEMPLATE ?? DEFAULT_PROMPT_TEMPLATE
 
+  const model = process.env.AI_MODEL ?? 'gemini-2.0-flash'
+
   const { text } = await generateText({
-    model: google('gemini-2.0-flash'),
+    model: google(model),
     system: systemMessage,
     prompt: `Generate a creative scenario for ${date}.`,
   })
