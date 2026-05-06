@@ -17,7 +17,7 @@ jobs:
             --request POST \
             --header "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
             --header "Content-Type: application/json" \
-            "${{ secrets.PROMPTER_API_URL }}/prompts/generate")
+            "${{ secrets.PROMPTER_API_URL }}/generate")
 
           echo "Response body:"
           cat response.json

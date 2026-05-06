@@ -1,8 +1,12 @@
-import { Hono } from 'hono'
-import prompts from './routes/prompts.js'
+import { Hono } from "hono";
+import arrangements from "./routes/arrangements.js";
+import generate from "./routes/generate.js";
+import prompts from "./routes/prompts.js";
 
-const app = new Hono()
+const app = new Hono();
 
-app.route('/prompts', prompts)
+app.route("/generate", generate);
+app.route("/prompts", prompts);
+app.route("/arrangements", arrangements);
 
-export default app
+export default app;

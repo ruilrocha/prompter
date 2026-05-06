@@ -1,14 +1,21 @@
 {
-  "name": "hono",
+  "name": "prompter",
   "type": "module",
+  "scripts": {
+    "lint": "biome lint ./src",
+    "format": "biome format --write ./src",
+    "check": "biome check --write ./src"
+  },
   "dependencies": {
     "@ai-sdk/google": "^3.0.67",
     "@upstash/ratelimit": "^2.0.8",
     "@upstash/redis": "^1.38.0",
     "ai": "^6.0.175",
-    "hono": "^4.12.17"
+    "hono": "^4.12.17",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@biomejs/biome": "^2.4.14",
     "@types/node": "^20.11.17",
     "tsx": "^4.7.1",
     "typescript": "^5.8.3"
