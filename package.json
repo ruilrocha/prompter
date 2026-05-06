@@ -3,6 +3,7 @@
   "type": "module",
   "dependencies": {
     "@ai-sdk/google": "^3.0.67",
+    "@upstash/ratelimit": "^2.0.8",
     "@upstash/redis": "^1.38.0",
     "ai": "^6.0.175",
     "hono": "^4.12.17"

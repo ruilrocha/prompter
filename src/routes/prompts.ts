@@ -1,6 +1,7 @@
 import { Hono } from 'hono'
 import { generatePrompt } from '../lib/ai.js'
 import { redis, dateKey, LATEST_KEY, PROMPT_TTL, type PromptEntry } from '../lib/redis.js'
+import { latestLimiter, generateLimiter } from '../lib/ratelimit.js'
 
 const prompts = new Hono()
 
@@ -35,6 +36,16 @@ prompts.post('/generate', async (c) => {
 
   if (!requireBearer(process.env.CRON_SECRET, authHeader)) {
     return c.json({ error: 'Unauthorized' }, 401)
+  }
+
+  // Rate limit authenticated callers — guards against loops/bugs in the cron job
+  const { success, limit, remaining, reset } = await generateLimiter.limit('cron')
+  c.header('X-RateLimit-Limit', String(limit))
+  c.header('X-RateLimit-Remaining', String(remaining))
+  c.header('X-RateLimit-Reset', String(reset))
+
+  if (!success) {
+    return c.json({ error: 'Too many requests' }, 429)
   }
 
   const date = getTomorrowDate()
@@ -72,6 +83,17 @@ prompts.get('/latest', async (c) => {
 
   if (!requireApiKey(process.env.API_KEY, apiKeyHeader)) {
     return c.json({ error: 'Unauthorized' }, 401)
+  }
+
+  // Rate limit by caller IP
+  const ip = c.req.header('x-forwarded-for')?.split(',')[0].trim() ?? 'anonymous'
+  const { success, limit, remaining, reset } = await latestLimiter.limit(ip)
+  c.header('X-RateLimit-Limit', String(limit))
+  c.header('X-RateLimit-Remaining', String(remaining))
+  c.header('X-RateLimit-Reset', String(reset))
+
+  if (!success) {
+    return c.json({ error: 'Too many requests' }, 429)
   }
 
   const payload = await redis.get<PromptEntry>(LATEST_KEY)
