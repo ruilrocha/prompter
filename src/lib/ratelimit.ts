@@ -17,7 +17,7 @@ export const latestLimiter = new Ratelimit({
 	redis,
 	limiter: Ratelimit.slidingWindow(latestRequests, `${latestWindowSeconds} s`),
 	prefix: "ratelimit:prompter:latest",
-	analytics: true,
+	analytics: false,
 });
 
 /**
@@ -40,5 +40,5 @@ export const generateLimiter = new Ratelimit({
 	redis,
 	limiter: Ratelimit.fixedWindow(generateRequests, `${generateWindowHours} h`),
 	prefix: "ratelimit:prompter:generate",
-	analytics: true,
+	analytics: false,
 });
