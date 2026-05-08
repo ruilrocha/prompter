@@ -4,9 +4,8 @@ import { getTomorrowDate } from "../lib/date.js";
 import { bearerAuth, rateLimitFixed } from "../lib/middleware.js";
 import { generateLimiter } from "../lib/ratelimit.js";
 import {
-	type ArrangementEntry,
-	arrangementDateKey,
-	dateKey,
+	type DailyEntry,
+	entryDateKey,
 	PROMPT_TTL,
 	redis,
 } from "../lib/redis.js";
@@ -29,43 +28,27 @@ generate.post(
 
 		// Serve from cache unless force=true
 		if (!force) {
-			const existingPrompt = await redis.get<string>(dateKey(date));
-			if (existingPrompt) {
-				const existingArrangement = await redis.get<ArrangementEntry>(
-					arrangementDateKey(date),
-				);
-				return c.json(
-					{
-						date,
-						prompt: existingPrompt,
-						arrangement: existingArrangement,
-						cached: true,
-					},
-					200,
-				);
+			const existing = await redis.get<DailyEntry>(entryDateKey(date));
+			if (existing) {
+				return c.json({ date, ...existing, cached: true }, 200);
 			}
 		}
 
-		let entry: Awaited<ReturnType<typeof generateDailyEntry>>;
+		let entry: DailyEntry;
 		try {
-			entry = await generateDailyEntry(date);
+			const generated = await generateDailyEntry(date);
+			entry = {
+				scenario: generated.scenario,
+				arrangement: generated.arrangement,
+			};
 		} catch (err) {
 			console.error("Failed to generate daily entry:", err);
 			return c.json({ error: "Failed to generate daily entry" }, 500);
 		}
 
-		const { scenario: prompt, ...arrangement } = entry;
-		const arrangementEntry: ArrangementEntry = { date, ...arrangement };
+		await redis.set(entryDateKey(date), entry, { ex: PROMPT_TTL });
 
-		await Promise.all([
-			redis.set(dateKey(date), prompt, { ex: PROMPT_TTL }),
-			redis.set(arrangementDateKey(date), arrangementEntry, { ex: PROMPT_TTL }),
-		]);
-
-		return c.json(
-			{ date, prompt, arrangement: arrangementEntry, cached: false },
-			201,
-		);
+		return c.json({ date, ...entry, cached: false }, 201);
 	},
 );
 

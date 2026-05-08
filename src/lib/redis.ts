@@ -14,25 +14,23 @@ export const redis = new Redis({
 	token: process.env.KV_REST_API_TOKEN,
 });
 
-/** Shape of a stored prompt entry. */
-export interface PromptEntry {
-	date: string;
-	prompt: string;
-}
-
-/** Shape of a stored arrangement entry. */
-export interface ArrangementEntry {
-	date: string;
+export interface Arrangement {
 	foundation: string;
 	supporting: string;
 	singing: string;
 }
 
-/** Redis key for a dated prompt (YYYY-MM-DD). */
-export const dateKey = (date: string) => `prompt:${date}`;
+/**
+ * Combined shape of a stored daily entry (prompt + arrangement).
+ * Both the GraphQL endpoint and the REST endpoints read from this single key.
+ */
+export interface DailyEntry {
+	scenario: string;
+	arrangement: Arrangement;
+}
 
-/** Redis key for a dated arrangement (YYYY-MM-DD). */
-export const arrangementDateKey = (date: string) => `arrangement:${date}`;
+/** Redis key for a daily entry (YYYY-MM-DD). */
+export const entryDateKey = (date: string) => `entry:${date}`;
 
-/** 30 days in seconds. */
-export const PROMPT_TTL = 60 * 60 * 24 * 30;
+/** 7 days in seconds. */
+export const PROMPT_TTL = 60 * 60 * 24 * 7;

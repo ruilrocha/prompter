@@ -47,11 +47,15 @@ Examples of good sets:
 // Schema
 // ---------------------------------------------------------------------------
 
-const dailyEntrySchema = z.object({
-	scenario: z.string(),
+const arrangementSchema = z.object({
 	foundation: z.string(),
 	supporting: z.string(),
 	singing: z.string(),
+});
+
+const dailyEntrySchema = z.object({
+	scenario: z.string(),
+	arrangement: arrangementSchema,
 });
 
 export type GeneratedEntry = z.infer<typeof dailyEntrySchema>;
