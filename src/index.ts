@@ -8,5 +8,3 @@ const app = new Hono();
 app.route("/generate", generate);
 app.route("/prompts", prompts);
 app.route("/arrangements", arrangements);
-
-export default app;
